@@ -210,6 +210,7 @@ alongside, so you can see whether an upgrade is available and what would change.
 ```
 vahub module add NAME[==VERSION] [options]
 vahub module add --source SPEC [options]
+vahub module add --all [options]
 ```
 
 Installs a module: resolves the source, fetches it at its pinned revision, creates a
@@ -219,6 +220,7 @@ reports which configuration keys still need values.
 | option | meaning |
 |---|---|
 | `--source SPEC` | Install from a source directly, without the registry. |
+| `--all` | Install every module in the registry. Each is installed independently: one failure does not stop the rest, already-installed modules are skipped (unless `--force`), a summary is printed, and the command exits non-zero if any failed. |
 | `--registry URL` | Use another index. |
 | `--name NAME` | Override the installed name. Useful for running two instances of the same module against different backends. |
 | `--set KEY=VALUE` | Record a configuration value for this module. Repeatable. |
