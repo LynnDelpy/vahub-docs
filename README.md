@@ -20,3 +20,11 @@ Start with the vahub README for a five-minute overview. These pages go deeper.
 
 Docs track the code. If a page and the code disagree, the code wins; please open
 an issue on the vahub repo.
+
+## The vahub project
+
+Three repositories, one project:
+
+- [vahub](https://github.com/LynnDelpy/vahub). The hub itself.
+- [vahub-modules](https://github.com/LynnDelpy/vahub-modules). The catalog and first-party modules.
+- [vahub-docs](https://github.com/LynnDelpy/vahub-docs) (this one). The full documentation.
