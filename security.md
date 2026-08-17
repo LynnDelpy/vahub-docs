@@ -48,9 +48,13 @@ Three consequences shape the design:
 * **Catalog filtering is ergonomics, not security.** Tools that the acting principal could never call
   are hidden from the model so it does not waste turns planning them. Hiding a tool is not what stops
   the call; the gate is, and it re-checks on every call regardless of what the model was shown.
-* **A module's self-description is a claim.** The manifest's `tools` block, with its class per tool, is
-  advisory. A module cannot grant itself permission by describing itself generously. `vahub.yaml`
-  decides.
+* **A module's self-description is a claim, but it cannot be downgraded.** The manifest's `tools` block,
+  with its class per tool, cannot grant permission: a module describing itself generously gets nothing,
+  because `vahub.yaml` decides what is reachable at all. It can only make an action MORE guarded. For the
+  confirmation decision the gate takes the stronger of the rule's class and the module's declared class,
+  so a policy rule that names a manifest-destructive tool but forgets `class: destructive` (which would
+  otherwise default to `read`) still forces a confirmation rather than silently skipping it. A rule can
+  raise a class above the manifest's, never lower it below.
 
 ## Argument-level constraints
 
