@@ -7,6 +7,7 @@ hub, checks a deployment, and manages modules.
 vahub [GLOBAL OPTIONS] COMMAND [ARGS]
 
   init                  write a starter vahub.yaml
+  start                 write a starter config if none exists, then run
   run                   run the hub in the foreground
   doctor                check the configuration, the modules and the environment
   config                show the effective configuration
@@ -69,6 +70,29 @@ The generated file binds the web server to `127.0.0.1`, sets `policy.default: de
 uses `llm.provider: mock`, so a fresh install starts, does nothing dangerous, and needs no
 credentials. Read it before you run anything else: it is the shortest description of what
 the hub can be told to do.
+
+## vahub start
+
+```
+vahub start [--config PATH] [--host HOST] [--port PORT]
+```
+
+The one command a first run needs. If no configuration file exists at the resolved path, it writes a
+safe starter one (loopback bind, the built-in login on, `policy.default: deny`, the mock model) and then
+runs the hub with human readable logging. If a configuration already exists, it is left untouched and
+`start` is just `vahub serve`.
+
+Everything else is done from the browser: open the printed URL, create the first account (it becomes the
+owner), then add modules, give them their tokens, and arrange the dashboard. Point the `llm` section at a
+real model when you want one, and add policy rules for what the assistant may do.
+
+| option | meaning |
+|---|---|
+| `--host HOST` | Override `web.host` for this run. |
+| `--port PORT` | Override `web.port` for this run. |
+
+The starter config allows both `http://localhost` and `http://127.0.0.1` as browser origins, so reaching
+the page by either name works. It does not write any credential.
 
 ## vahub run
 

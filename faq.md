@@ -283,8 +283,9 @@ version.
   broken or hostile: minimal environment, no shell, optional uid separation, timeouts on
   everything, results guarded before use, and module controlled strings never rendered as
   HTML on the page.
-* **The network is not trusted.** The hub has no authentication of its own and binds to
-  loopback. A proxy with client certificates is the intended boundary.
+* **The network is not trusted.** The hub has a built-in login (on by default) and binds to
+  loopback. On anything wider than loopback, a proxy with client certificates in front of the
+  login is the intended boundary.
 * **The operator is trusted.** Whoever writes `vahub.yaml` decides what the assistant can
   do. There is no protection against a policy that permits everything, and there should not
   be: that file is where the decision belongs, in one place, readable in a minute.

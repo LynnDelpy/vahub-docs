@@ -201,10 +201,12 @@ shows what happened.
 ## The web surface
 
 The hub authenticates with a built-in login or a reverse proxy. `web.auth.enabled` is on by default: a
-named account (created with `vahub user add`, scrypt-hashed password, a revocable database session in an
-HttpOnly SameSite=Strict cookie) is required to reach anything but the page shell, the health probes and
-the login itself. Turn it off only when a proxy in front already authenticates; the hub never invents a
-credential for you. Whoever confirms an action is recorded in the audit log by account.
+named account (scrypt-hashed password, a revocable database session in an HttpOnly SameSite=Strict
+cookie) is required to reach anything but the page shell, the health probes and the login itself. The
+first account can be created with `vahub user add` or, when the hub has none, from the browser: the first
+visitor claims the owner account, and once one exists that path returns 409, so a later stranger cannot
+sign themselves up. The hub never invents a credential for you. Turn the login off only when a proxy in
+front already authenticates. Whoever confirms an action is recorded in the audit log by account.
 
 What the hub does either way:
 
@@ -212,12 +214,18 @@ What the hub does either way:
 * Checks an `Origin` allowlist on state-changing routes and on the event WebSocket. Same-origin does not
   prevent another page from sending a cross-origin POST, and it does not apply to WebSockets at all. A
   request with no `Origin` (a script, curl) is allowed, which is why the bind address matters.
-* Exposes the assistant and a signed-in owner's own settings (saved places, preferences, schedules), and
-  nothing operator-facing: module states, module stderr, the audit log and direct tool invocation are
-  not reachable over HTTP at all. They are read with the CLI on the host (`vahub audit`, `vahub doctor`,
-  `vahub module verify`). The owner's own settings and the assistant's `core.*` tools edit saved data
-  only; the policy and the accounts stay file/CLI-only, so neither the UI nor the model can widen what
-  the assistant is allowed to do.
+* Exposes to a signed-in owner: the assistant, their own settings (saved places, preferences,
+  schedules), managing modules (install, configure, remove), and reading a module's read-only tools
+  directly (what the dashboard cards do). Not reachable over HTTP at all: module stderr, the audit log,
+  the full tool catalogue, and any write or destructive tool invoked outside the gate. Those are read
+  with the CLI on the host (`vahub audit`, `vahub doctor`, `vahub module verify`).
+* Keeps two boundaries around the owner surface. Installing a module never grants it permission: its
+  tools stay denied until a policy rule is written in `vahub.yaml`, a file-and-CLI action, so a stolen
+  session cannot make a module do anything to the world. And the owner's direct tool endpoint is
+  restricted to read-class tools (the manifest and the policy must agree), so it can never be a write or
+  a destructive action. The policy and the accounts stay file/CLI-only, so neither the UI nor the model
+  can widen what the assistant is allowed to do. Module tokens set from the UI are stored in the database
+  scoped to one module and never read back to the browser.
 * Records the subject from `web.auth_subject_header` for the audit log. It is never an authorization
   input, because a header is trivially forged by anything that can reach the port directly.
 

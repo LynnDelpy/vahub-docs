@@ -317,6 +317,12 @@ EnvironmentFile=/etc/vahub/secrets.env   # 0600, owned by root
 A module whose required keys are missing is discovered and shown by `vahub doctor` as `unconfigured`
 instead of failing to spawn, so the reason is obvious.
 
+A module's keys can also be set from the web interface (the Modules tab), for a hub you run entirely from
+the browser. Those values are stored in the hub database, scoped to the one module, and never read back
+to the browser: the UI shows which keys are set, not their values. The supervisor uses a stored value
+only when the host environment does not already provide the key, so an exported `VAHUB_MOD_<NAME>_<KEY>`
+or bare `<KEY>` still wins. Setting a key this way starts or restarts the module without a hub restart.
+
 ## A complete example
 
 ```yaml
