@@ -219,13 +219,18 @@ What the hub does either way:
   directly (what the dashboard cards do). Not reachable over HTTP at all: module stderr, the audit log,
   the full tool catalogue, and any write or destructive tool invoked outside the gate. Those are read
   with the CLI on the host (`vahub audit`, `vahub doctor`, `vahub module verify`).
-* Keeps two boundaries around the owner surface. Installing a module never grants it permission: its
-  tools stay denied until a policy rule is written in `vahub.yaml`, a file-and-CLI action, so a stolen
-  session cannot make a module do anything to the world. And the owner's direct tool endpoint is
-  restricted to read-class tools (the manifest and the policy must agree), so it can never be a write or
-  a destructive action. The policy and the accounts stay file/CLI-only, so neither the UI nor the model
-  can widen what the assistant is allowed to do. Module tokens set from the UI are stored in the database
-  scoped to one module and never read back to the browser.
+* Keeps the boundaries that matter around the owner surface. Installing a module grants the assistant
+  nothing: its tools stay denied to the model and the scheduler until a policy rule is written in
+  `vahub.yaml`, a file-and-CLI action, so the assistant can never install itself a capability, and the
+  policy and the accounts stay file/CLI-only. The owner's direct tool endpoint runs only tools the module
+  *declares* read (and that the policy has not classified as write or destructive). That declaration is
+  the module's own advisory claim; trusting it on this owner-only path is consistent with having chosen
+  to install and run the module (its code already runs with its own credentials). It does not defend
+  against a module that mislabels a write tool as read, but the boundary that does not rest on that trust
+  still holds: the untrusted model reaches a module only through the gate, never through this path, so it
+  still cannot reach a tool without a rule. Give a tool a write/destructive rule to remove the owner-path
+  trust for it too. Module tokens set from the UI are stored in the database scoped to one module and
+  never read back to the browser.
 * Records the subject from `web.auth_subject_header` for the audit log. It is never an authorization
   input, because a header is trivially forged by anything that can reach the port directly.
 
