@@ -235,6 +235,22 @@ involved. Set `speech.stt.provider: none` and `speech.tts.provider: none` if you
 audio. Voice adds a shorter wall clock budget (`budgets.wall_clock_voice_s`) because a
 person waiting for a spoken answer gives up sooner than one watching a screen.
 
+## Can I put things on my home screen?
+
+Yes. The home page is a grid of cards you arrange by dragging them (this works with a mouse
+or a touch screen), and the layout is saved on the hub. Add a card with the "Add card"
+button: a built in one (clock, saved places, upcoming routines, and the service cards for
+GitHub, GitLab and Email), or a card backed by any read tool of a module you have installed.
+A transit "next_departures" card with the argument `{"station": "Zürich HB"}` becomes a live
+departures board, for example.
+
+You can also just ask. Say something like "always show me the departures from Zürich HB" and
+the assistant pins the card for you, through a gated `core.add_card` tool (with
+`core.remove_card` and `core.list_cards` alongside it). Pinning a card grants the assistant
+nothing new: the card reads through the same owner path a card added by hand uses, which only
+ever runs a tool the module declares read. The accent colour and the light or dark theme are
+chosen under Settings, Appearance, and are stored on the hub too.
+
 ## Is my conversation history stored?
 
 Yes, in SQLite in the state directory, together with the audit log of every tool call. It
