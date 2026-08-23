@@ -219,22 +219,31 @@ What the hub does either way:
   prevent another page from sending a cross-origin POST, and it does not apply to WebSockets at all. A
   request with no `Origin` (a script, curl) is allowed, which is why the bind address matters.
 * Exposes to a signed-in owner: the assistant, their own settings (saved places, preferences,
-  schedules), managing modules (install, configure, remove), and reading a module's read-only tools
-  directly (what the dashboard cards do). Not reachable over HTTP at all: module stderr, the audit log,
-  the full tool catalogue, and any write or destructive tool invoked outside the gate. Those are read
+  schedules), managing modules (install, configure, remove), reading a module's read-only tools directly
+  (what the dashboard cards do), and, on a separate control route, running a module's write tools (what
+  a play, pause or change-speaker button does). Not reachable over HTTP at all: module stderr, the audit
+  log, the full tool catalogue, and any destructive tool, which no owner route will run. Those are read
   with the CLI on the host (`vahub audit`, `vahub doctor`, `vahub module verify`).
 * Keeps the boundaries that matter around the owner surface. Installing a module grants the assistant
   nothing: its tools stay denied to the model and the scheduler until a policy rule is written in
   `vahub.yaml`, a file-and-CLI action, so the assistant can never install itself a capability, and the
-  policy and the accounts stay file/CLI-only. The owner's direct tool endpoint runs only tools the module
-  *declares* read (and that the policy has not classified as write or destructive). That declaration is
-  the module's own advisory claim; trusting it on this owner-only path is consistent with having chosen
-  to install and run the module (its code already runs with its own credentials). It does not defend
-  against a module that mislabels a write tool as read, but the boundary that does not rest on that trust
-  still holds: the untrusted model reaches a module only through the gate, never through this path, so it
-  still cannot reach a tool without a rule. Give a tool a write/destructive rule to remove the owner-path
-  trust for it too. Module tokens set from the UI are stored in the database scoped to one module and
-  never read back to the browser.
+  policy and the accounts stay file/CLI-only. The owner's direct tool endpoints are split by what they
+  may run: the card route (`/api/tools/...`) runs only tools the module *declares* read, and the control
+  route (`/api/control/...`) also runs write tools, which is what a playback button needs. A destructive
+  tool is refused on both, because those are exactly the actions that must be confirmed out of band, so
+  they go through the gate or not at all. The class used is the stronger of the module's declaration and
+  any policy rule, so a rule can only ever restrict these routes, never widen them.
+
+  Those declarations are the module's own advisory claim; trusting them on an owner-only path is
+  consistent with having chosen to install and run the module (its code already runs with its own
+  credentials, and the same owner could install any module at all). It does not defend against a module
+  that mislabels a destructive tool as write, but the boundary that does not rest on that trust still
+  holds: the untrusted model reaches a module only through the gate, never through these routes, so it
+  still cannot reach a tool without a rule, and nothing the model says can press a button in your
+  browser. Give a tool a destructive rule to keep it off the owner routes entirely. Both routes are
+  origin-checked and audited by account, with a control call recorded as `allow-owner-write` so a write
+  done from the UI is distinguishable in the log from a card reading data. Module tokens set from the UI
+  are stored in the database scoped to one module and never read back to the browser.
 * Records the subject from `web.auth_subject_header` for the audit log. It is never an authorization
   input, because a header is trivially forged by anything that can reach the port directly.
 

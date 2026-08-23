@@ -251,6 +251,15 @@ nothing new: the card reads through the same owner path a card added by hand use
 ever runs a tool the module declares read. The accent colour and the light or dark theme are
 chosen under Settings, Appearance, and are stored on the hub too.
 
+## Can the dashboard control things, or only show them?
+
+Both, and the difference is deliberate. A card reads through a route that runs only tools a module
+declares read, so a card can never act by itself. Buttons (play, pause, move the music to another
+speaker) go through a separate control route that also runs write tools. A destructive tool is refused
+on both: those are the ones worth being asked about, so they go through the policy gate, which holds the
+action and waits for a person. Both routes need the login, are origin-checked, and are written to the
+audit log by account, where a control call appears as `allow-owner-write`.
+
 ## Is my conversation history stored?
 
 Yes, in SQLite in the state directory, together with the audit log of every tool call. It
