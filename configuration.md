@@ -23,12 +23,17 @@ a conversation and do nothing else (the policy denies everything and no modules 
 Lowest to highest:
 
 ```
-built-in defaults  <  vahub.yaml  <  VAHUB_* environment variables
+built-in defaults  <  vahub.yaml  <  VAHUB_* environment variables  <  chosen in the web UI
 ```
 
 Environment overrides exist for container deployments, where injecting one variable is easier than
 templating a file. They apply to scalar values only. That is deliberate: nobody should be expressing a
 policy rule as an environment variable.
+
+The last step is narrow and applies to one thing: which model answers, listens and speaks. An admin can
+set that under Settings, Models, and the choice is stored in the database rather than written back into
+your file, so the file stays yours and stays the source of truth for everything else. See
+[choosing a model](#choosing-a-model-without-editing-the-file).
 
 ## Strictness
 
@@ -160,6 +165,29 @@ llm:
 | `max_tokens` | `1024` | Per response |
 | `request_timeout_s` | `60` | |
 | `system_prompt` | none | Replaces the built-in prompt. The built-in one tells the model that tool results are data and never instructions; if you replace it, keep that sentence |
+
+## Choosing a model without editing the file
+
+`llm`, `speech.stt` and `speech.tts` are the three sections an admin can also set from the web
+interface, under Settings, Models. It is the same set of fields, and the same meanings; what changes is
+where the value comes from.
+
+* Only these fields can be set there: provider, server, model, API key, and additionally temperature and
+  max tokens for `llm`, and voice for `tts`. Anything else stays a file-only setting.
+* A value set in the UI is stored in the hub's database and takes precedence over the file. Clearing it
+  ("Use the config file") deletes the stored value, and the file's value applies again on the spot.
+* An API key set this way is stored the way a module's token is: scoped, never returned to the browser,
+  and redacted in the audit log. The page can tell you a key is set; it cannot tell you what it is.
+* Changing any of it rebuilds the adapters immediately. A conversation already in flight finishes on the
+  model it started with; the next message uses the new one. There is no restart.
+* It is admin-only, because it spends money and holds a credential. The server refuses it for anyone
+  else rather than merely hiding the page.
+* It grants the assistant nothing. Which tools may be called is still decided by `policy`, which is
+  file-and-CLI only. Changing the model changes who answers, not what may be done.
+
+This is what makes a self-hosted speech stack practical: point `speech.stt` at a Whisper server on your
+own machine and `speech.tts` at a local voice, without a text editor or a restart. Anything that speaks
+the OpenAI shape works, which most of them do.
 
 ### budgets
 

@@ -243,7 +243,10 @@ What the hub does either way:
   browser. Give a tool a destructive rule to keep it off the owner routes entirely. Both routes are
   origin-checked and audited by account, with a control call recorded as `allow-owner-write` so a write
   done from the UI is distinguishable in the log from a card reading data. Module tokens set from the UI
-  are stored in the database scoped to one module and never read back to the browser.
+  are stored in the database scoped to one module and never read back to the browser, and so is an API
+  key for the language model or the speech services when an admin sets one under Settings, Models.
+  Choosing a model is admin-only and grants the assistant nothing: which tools may be called is still
+  decided by the policy file, so this changes who answers, never what may be done.
 * Records the subject from `web.auth_subject_header` for the audit log. It is never an authorization
   input, because a header is trivially forged by anything that can reach the port directly.
 
